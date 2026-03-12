@@ -1,0 +1,19 @@
+.error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: var(--color-error-bg);
+  border-left: 3px solid var(--color-error);
+  border-radius: 4px;
+}
+
+.icon {
+  color: var(--color-error);
+  flex-shrink: 0;
+}
+
+.text {
+  color: var(--color-error);
+  font-size: 14px;
+}

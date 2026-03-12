@@ -1,0 +1,93 @@
+.page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--color-bg-secondary);
+}
+
+.card {
+  max-width: 420px;
+  width: 100%;
+  padding: 32px;
+  border-radius: var(--border-radius-lg);
+  background-color: var(--color-bg);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logoBlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.logoIcon {
+  color: var(--color-primary);
+}
+
+.title {
+  font-size: 24px;
+  color: var(--color-text);
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-input-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--color-primary);
+}
+
+.inputError {
+  border-color: var(--color-error);
+}
+
+.scopeGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scopeLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.loginButton {
+  width: 100%;
+}
+
+.loginButton button {
+  width: 100%;
+}
+
+/* === Адаптивность === */
+@media (max-width: 480px) {
+  .card {
+    box-shadow: none;
+    padding: 20px;
+    max-width: 100%;
+  }
+}
