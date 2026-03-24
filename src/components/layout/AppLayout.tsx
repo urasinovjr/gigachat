@@ -11,18 +11,15 @@ interface AppLayoutProps {
 function AppLayout({ sidebar, main, isSidebarOpen, onToggleSidebar }: AppLayoutProps) {
   return (
     <div className={styles.layout}>
-      {/* Оверлей для мобильного sidebar */}
       <div
         className={`${styles.overlay} ${isSidebarOpen ? styles.overlayVisible : ""}`}
         onClick={onToggleSidebar}
       />
 
-      {/* Sidebar */}
       <aside className={`${styles.sidebar} ${isSidebarOpen ? styles.sidebarOpen : ""}`}>
         {sidebar}
       </aside>
 
-      {/* Main */}
       <main className={styles.main}>
         <button className={styles.burgerButton} onClick={onToggleSidebar}>
           <Menu size={24} />

@@ -37,7 +37,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           </button>
         </div>
 
-        {/* Модель */}
         <div className={styles.field}>
           <label className={styles.label}>Модель</label>
           <select
@@ -52,7 +51,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           </select>
         </div>
 
-        {/* Temperature */}
         <div className={styles.field}>
           <Slider
             label="Temperature"
@@ -64,7 +62,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           />
         </div>
 
-        {/* Top-P */}
         <div className={styles.field}>
           <Slider
             label="Top-P"
@@ -76,7 +73,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           />
         </div>
 
-        {/* Max Tokens */}
         <div className={styles.field}>
           <label className={styles.label}>Max Tokens</label>
           <input
@@ -89,7 +85,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           />
         </div>
 
-        {/* System Prompt */}
         <div className={styles.field}>
           <label className={styles.label}>System Prompt</label>
           <textarea
@@ -100,7 +95,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           />
         </div>
 
-        {/* Тема */}
         <div className={styles.field}>
           <Toggle
             label="Тёмная тема"
@@ -109,7 +103,6 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
           />
         </div>
 
-        {/* Кнопки */}
         <div className={styles.buttons}>
           <Button variant="primary" onClick={() => onSave(local)}>Сохранить</Button>
           <Button variant="secondary" onClick={onReset}>Сбросить</Button>

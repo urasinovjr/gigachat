@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { Paperclip, Send, Square } from "lucide-react";
+import { Paperclip, Send } from "lucide-react";
 import styles from "./InputArea.module.css";
 
 interface InputAreaProps {
   onSend: (text: string) => void;
-  onStop: () => void;
-  isGenerating?: boolean;
+  disabled?: boolean;
 }
 
-function InputArea({ onSend, onStop, isGenerating = false }: InputAreaProps) {
+function InputArea({ onSend, disabled = false }: InputAreaProps) {
   const [value, setValue] = useState("");
 
   const handleSend = () => {
-    if (value.trim() === "") return;
+    if (value.trim() === "" || disabled) return;
     onSend(value.trim());
     setValue("");
   };
@@ -37,21 +36,16 @@ function InputArea({ onSend, onStop, isGenerating = false }: InputAreaProps) {
         onKeyDown={handleKeyDown}
         placeholder="Введите сообщение..."
         rows={1}
+        disabled={disabled}
       />
 
-      {isGenerating ? (
-        <button className={styles.stopButton} onClick={onStop}>
-          <Square size={16} />
-        </button>
-      ) : (
-        <button
-          className={styles.sendButton}
-          onClick={handleSend}
-          disabled={value.trim() === ""}
-        >
-          <Send size={18} />
-        </button>
-      )}
+      <button
+        className={styles.sendButton}
+        onClick={handleSend}
+        disabled={value.trim() === "" || disabled}
+      >
+        <Send size={18} />
+      </button>
     </div>
   );
 }

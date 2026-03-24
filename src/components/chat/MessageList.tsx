@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import type { MessageData } from "../../types";
 import Message from "./Message";
 import TypingIndicator from "./TypingIndicator";
@@ -10,7 +11,13 @@ interface MessageListProps {
 }
 
 function MessageList({ messages, isTyping }: MessageListProps) {
-  if (messages.length === 0) {
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
+
+  if (messages.length === 0 && !isTyping) {
     return <EmptyState />;
   }
 
@@ -25,6 +32,7 @@ function MessageList({ messages, isTyping }: MessageListProps) {
         />
       ))}
       <TypingIndicator isVisible={isTyping} />
+      <div ref={bottomRef} />
     </div>
   );
 }
