@@ -1,13 +1,15 @@
 import { useState } from "react";
-import { Paperclip, Send } from "lucide-react";
+import { Paperclip, Send, Square } from "lucide-react";
 import styles from "./InputArea.module.css";
 
 interface InputAreaProps {
   onSend: (text: string) => void;
   disabled?: boolean;
+  isLoading?: boolean;
+  onStop?: () => void;
 }
 
-function InputArea({ onSend, disabled = false }: InputAreaProps) {
+function InputArea({ onSend, disabled = false, isLoading = false, onStop }: InputAreaProps) {
   const [value, setValue] = useState("");
 
   const handleSend = () => {
@@ -39,13 +41,19 @@ function InputArea({ onSend, disabled = false }: InputAreaProps) {
         disabled={disabled}
       />
 
-      <button
-        className={styles.sendButton}
-        onClick={handleSend}
-        disabled={value.trim() === "" || disabled}
-      >
-        <Send size={18} />
-      </button>
+      {isLoading ? (
+        <button className={styles.stopButton} onClick={onStop}>
+          <Square size={18} />
+        </button>
+      ) : (
+        <button
+          className={styles.sendButton}
+          onClick={handleSend}
+          disabled={value.trim() === "" || disabled}
+        >
+          <Send size={18} />
+        </button>
+      )}
     </div>
   );
 }

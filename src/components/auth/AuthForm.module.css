@@ -83,7 +83,6 @@
   width: 100%;
 }
 
-/* === Адаптивность === */
 @media (max-width: 480px) {
   .card {
     box-shadow: none;

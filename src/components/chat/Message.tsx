@@ -1,5 +1,6 @@
+import { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Bot, Copy } from "lucide-react";
+import { Bot, Copy, Check } from "lucide-react";
 import styles from "./Message.module.css";
 
 interface MessageProps {
@@ -9,9 +10,12 @@ interface MessageProps {
 }
 
 function Message({ role, content, timestamp }: MessageProps) {
+  const [copied, setCopied] = useState(false);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
-    alert("Скопировано!");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -32,10 +36,12 @@ function Message({ role, content, timestamp }: MessageProps) {
           <ReactMarkdown>{content}</ReactMarkdown>
         </div>
 
-        <button className={styles.copyButton} onClick={handleCopy}>
-          <Copy size={14} />
-          Копировать
-        </button>
+        {role === "assistant" && (
+          <button className={styles.copyButton} onClick={handleCopy}>
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? "Скопировано" : "Копировать"}
+          </button>
+        )}
       </div>
     </div>
   );

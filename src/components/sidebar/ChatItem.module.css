@@ -39,7 +39,6 @@
   color: var(--color-text-secondary);
 }
 
-/* === Кнопки edit/delete === */
 .actions {
   display: none;
   gap: 4px;

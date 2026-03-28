@@ -27,7 +27,6 @@
   display: none;
 }
 
-/* На мобильных показываем кнопку закрытия */
 @media (max-width: 768px) {
   .closeButton {
     display: flex;

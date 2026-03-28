@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Settings } from "lucide-react";
 import type { MessageData } from "../../types";
 import MessageList from "./MessageList";
@@ -13,6 +13,7 @@ interface ChatWindowProps {
 function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const timerRef = useRef<number | null>(null);
 
   const handleSend = (text: string) => {
     const now = new Date();
@@ -28,7 +29,7 @@ function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
     setMessages([...messages, userMessage]);
     setIsLoading(true);
 
-    setTimeout(() => {
+    timerRef.current = window.setTimeout(() => {
       const assistantMessage: MessageData = {
         id: String(Date.now()),
         role: "assistant",
@@ -38,7 +39,16 @@ function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
 
       setMessages((prev) => [...prev, assistantMessage]);
       setIsLoading(false);
+      timerRef.current = null;
     }, 1500);
+  };
+
+  const handleStop = () => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    setIsLoading(false);
   };
 
   return (
@@ -52,7 +62,7 @@ function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
 
       <MessageList messages={messages} isTyping={isLoading} />
 
-      <InputArea onSend={handleSend} disabled={isLoading} />
+      <InputArea onSend={handleSend} disabled={isLoading} isLoading={isLoading} onStop={handleStop} />
     </div>
   );
 }
