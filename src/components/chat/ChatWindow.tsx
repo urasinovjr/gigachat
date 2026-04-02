@@ -1,21 +1,38 @@
-import { useState, useRef } from "react";
+import { useRef, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { Settings } from "lucide-react";
-import type { MessageData } from "../../types";
+import { useChatContext } from "../../app/providers/ChatContext";
+import { sendMessageStream, sendMessageRest } from "../../api/gigachat";
+import type { MessageData, SettingsData } from "../../types";
 import MessageList from "./MessageList";
 import InputArea from "./InputArea";
 import styles from "./ChatWindow.module.css";
 
 interface ChatWindowProps {
-  chatTitle: string;
+  token: string;
+  settings: SettingsData;
   onOpenSettings: () => void;
 }
 
-function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
-  const [messages, setMessages] = useState<MessageData[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const timerRef = useRef<number | null>(null);
+function ChatWindow({ token, settings, onOpenSettings }: ChatWindowProps) {
+  const { id } = useParams<{ id: string }>();
+  const { state, dispatch } = useChatContext();
+  const abortRef = useRef<AbortController | null>(null);
+  const navigate = useNavigate();
 
-  const handleSend = (text: string) => {
+  const chat = state.chats.find((c) => c.id === id);
+  const messages = id ? state.messages[id] || [] : [];
+  const chatTitle = chat ? chat.title : "Чат";
+
+  useEffect(() => {
+    if (id && !state.chats.find((c) => c.id === id)) {
+      navigate("/", { replace: true });
+    }
+  }, [id, state.chats, navigate]);
+
+  const handleSend = async (text: string) => {
+    if (!id) return;
+
     const now = new Date();
     const time = now.getHours() + ":" + String(now.getMinutes()).padStart(2, "0");
 
@@ -26,29 +43,92 @@ function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
       timestamp: time,
     };
 
-    setMessages([...messages, userMessage]);
-    setIsLoading(true);
+    dispatch({ type: "ADD_MESSAGE", payload: { chatId: id, message: userMessage } });
+    dispatch({ type: "SET_LOADING", payload: true });
+    dispatch({ type: "SET_ERROR", payload: null });
 
-    timerRef.current = window.setTimeout(() => {
+    const currentMessages = [...messages, userMessage];
+    if (currentMessages.filter((m) => m.role === "user").length === 1) {
+      const autoTitle = text.length > 35 ? text.substring(0, 35) + "..." : text;
+      dispatch({ type: "RENAME_CHAT", payload: { id, title: autoTitle } });
+    }
+
+    const apiMessages = [];
+    if (settings.systemPrompt) {
+      apiMessages.push({ role: "system" as const, content: settings.systemPrompt });
+    }
+    for (const msg of currentMessages) {
+      if (msg.role === "user" || msg.role === "assistant") {
+        apiMessages.push({ role: msg.role, content: msg.content });
+      }
+    }
+
+    const assistantId = String(Date.now() + 1);
+    const assistantTime =
+      new Date().getHours() + ":" + String(new Date().getMinutes()).padStart(2, "0");
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      let fullContent = "";
+
       const assistantMessage: MessageData = {
-        id: String(Date.now()),
+        id: assistantId,
         role: "assistant",
-        content: "Это моковый ответ от GigaChat. В будущем здесь будет настоящий ответ от API.",
-        timestamp: new Date().getHours() + ":" + String(new Date().getMinutes()).padStart(2, "0"),
+        content: "",
+        timestamp: assistantTime,
       };
+      dispatch({ type: "ADD_MESSAGE", payload: { chatId: id, message: assistantMessage } });
 
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-      timerRef.current = null;
-    }, 1500);
+      try {
+        await sendMessageStream(
+          token,
+          apiMessages,
+          settings,
+          (chunk) => {
+            fullContent += chunk;
+            dispatch({
+              type: "UPDATE_MESSAGE",
+              payload: { chatId: id, messageId: assistantId, content: fullContent },
+            });
+          },
+          () => {},
+          controller.signal
+        );
+      } catch (streamError) {
+        if (controller.signal.aborted) throw streamError;
+
+        const restContent = await sendMessageRest(
+          token,
+          apiMessages,
+          settings,
+          controller.signal
+        );
+        dispatch({
+          type: "UPDATE_MESSAGE",
+          payload: { chatId: id, messageId: assistantId, content: restContent },
+        });
+      }
+    } catch (err) {
+      if (controller.signal.aborted) {
+        // ignore
+      } else {
+        const errorMessage = err instanceof Error ? err.message : "Произошла ошибка";
+        dispatch({ type: "SET_ERROR", payload: errorMessage });
+      }
+    } finally {
+      dispatch({ type: "SET_LOADING", payload: false });
+      abortRef.current = null;
+    }
   };
 
   const handleStop = () => {
-    if (timerRef.current !== null) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    if (abortRef.current) {
+      abortRef.current.abort();
+      abortRef.current = null;
     }
-    setIsLoading(false);
+    dispatch({ type: "SET_LOADING", payload: false });
   };
 
   return (
@@ -60,9 +140,16 @@ function ChatWindow({ chatTitle, onOpenSettings }: ChatWindowProps) {
         </button>
       </div>
 
-      <MessageList messages={messages} isTyping={isLoading} />
+      <MessageList messages={messages} isTyping={state.isLoading} />
 
-      <InputArea onSend={handleSend} disabled={isLoading} isLoading={isLoading} onStop={handleStop} />
+      {state.error && <div className={styles.errorBar}>{state.error}</div>}
+
+      <InputArea
+        onSend={handleSend}
+        disabled={state.isLoading}
+        isLoading={state.isLoading}
+        onStop={handleStop}
+      />
     </div>
   );
 }

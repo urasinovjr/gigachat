@@ -40,6 +40,14 @@
   background-color: var(--color-bg-hover);
 }
 
+.errorBar {
+  padding: 8px 20px;
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
+  font-size: 13px;
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .chatHeader {
     padding-left: 52px;

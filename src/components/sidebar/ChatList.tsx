@@ -6,7 +6,7 @@ interface ChatListProps {
   chats: Chat[];
   activeChatId: string;
   onChatSelect: (id: string) => void;
-  onChatEdit: (id: string) => void;
+  onChatEdit: (id: string, newTitle: string) => void;
   onChatDelete: (id: string) => void;
 }
 
@@ -18,10 +18,10 @@ function ChatList({ chats, activeChatId, onChatSelect, onChatEdit, onChatDelete 
           key={chat.id}
           id={chat.id}
           title={chat.title}
-          lastMessageDate={chat.lastMessageDate}
+          createdAt={chat.createdAt}
           isActive={chat.id === activeChatId}
           onSelect={() => onChatSelect(chat.id)}
-          onEdit={() => onChatEdit(chat.id)}
+          onEdit={(newTitle) => onChatEdit(chat.id, newTitle)}
           onDelete={() => onChatDelete(chat.id)}
         />
       ))}

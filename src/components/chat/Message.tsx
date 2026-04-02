@@ -1,16 +1,19 @@
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
+import rehypeHighlight from "rehype-highlight";
 import { Bot, Copy, Check } from "lucide-react";
 import styles from "./Message.module.css";
 
 interface MessageProps {
-  role: "user" | "assistant";
+  role: "user" | "assistant" | "system";
   content: string;
   timestamp: string;
 }
 
 function Message({ role, content, timestamp }: MessageProps) {
   const [copied, setCopied] = useState(false);
+
+  if (role === "system") return null;
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content);
@@ -33,7 +36,7 @@ function Message({ role, content, timestamp }: MessageProps) {
         </div>
 
         <div className={styles.content}>
-          <ReactMarkdown>{content}</ReactMarkdown>
+          <ReactMarkdown rehypePlugins={[rehypeHighlight]}>{content}</ReactMarkdown>
         </div>
 
         {role === "assistant" && (

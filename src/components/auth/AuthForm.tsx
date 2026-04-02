@@ -6,19 +6,22 @@ import styles from "./AuthForm.module.css";
 
 interface AuthFormProps {
   onLogin: (credentials: string, scope: string) => void;
+  error?: string;
 }
 
-function AuthForm({ onLogin }: AuthFormProps) {
+function AuthForm({ onLogin, error: externalError = "" }: AuthFormProps) {
   const [credentials, setCredentials] = useState("");
   const [scope, setScope] = useState("GIGACHAT_API_PERS");
-  const [error, setError] = useState("");
+  const [localError, setLocalError] = useState("");
+
+  const displayError = externalError || localError;
 
   const handleLogin = () => {
     if (credentials.trim() === "") {
-      setError("Поле не должно быть пустым");
+      setLocalError("Поле не должно быть пустым");
       return;
     }
-    setError("");
+    setLocalError("");
     onLogin(credentials, scope);
   };
 
@@ -33,13 +36,13 @@ function AuthForm({ onLogin }: AuthFormProps) {
 
         <input
           type="password"
-          className={`${styles.input} ${error ? styles.inputError : ""}`}
+          className={`${styles.input} ${displayError ? styles.inputError : ""}`}
           placeholder="Введите Credentials (Base64)"
           value={credentials}
           onChange={(e) => setCredentials(e.target.value)}
         />
 
-        {error && <ErrorMessage message={error} />}
+        {displayError && <ErrorMessage message={displayError} />}
 
         <div className={styles.scopeGroup}>
           <label className={styles.scopeLabel}>
