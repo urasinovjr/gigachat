@@ -3,7 +3,7 @@ import type { ChatState, ChatAction } from "../../types";
 import { saveChats, loadChats } from "../../utils/storage";
 import { ChatContext, initialState } from "./ChatContext";
 
-function chatReducer(state: ChatState, action: ChatAction): ChatState {
+export function chatReducer(state: ChatState, action: ChatAction): ChatState {
   switch (action.type) {
     case "CREATE_CHAT":
       return {
