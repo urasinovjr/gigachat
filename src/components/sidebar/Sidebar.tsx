@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Plus, X } from "lucide-react";
 import { useChatContext } from "../../app/providers/ChatContext";
@@ -20,18 +20,20 @@ function Sidebar({ onClose }: SidebarProps) {
   const pathMatch = location.pathname.match(/^\/chat\/(.+)$/);
   const activeId = pathMatch ? pathMatch[1] : "";
 
-  const filteredChats = state.chats.filter((chat) => {
-    const query = searchQuery.toLowerCase();
-    const titleMatch = chat.title.toLowerCase().includes(query);
-    const chatMessages = state.messages[chat.id] || [];
-    const lastMessage = chatMessages[chatMessages.length - 1];
-    const messageMatch = lastMessage
-      ? lastMessage.content.toLowerCase().includes(query)
-      : false;
-    return titleMatch || messageMatch;
-  });
+  const filteredChats = useMemo(() => {
+    return state.chats.filter((chat) => {
+      const query = searchQuery.toLowerCase();
+      const titleMatch = chat.title.toLowerCase().includes(query);
+      const chatMessages = state.messages[chat.id] || [];
+      const lastMessage = chatMessages[chatMessages.length - 1];
+      const messageMatch = lastMessage
+        ? lastMessage.content.toLowerCase().includes(query)
+        : false;
+      return titleMatch || messageMatch;
+    });
+  }, [state.chats, state.messages, searchQuery]);
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     const newId = String(Date.now());
     dispatch({
       type: "CREATE_CHAT",
@@ -43,24 +45,24 @@ function Sidebar({ onClose }: SidebarProps) {
     });
     navigate(`/chat/${newId}`);
     onClose();
-  };
+  }, [dispatch, navigate, onClose]);
 
-  const handleSelect = (chatId: string) => {
+  const handleSelect = useCallback((chatId: string) => {
     dispatch({ type: "SET_ACTIVE_CHAT", payload: chatId });
     navigate(`/chat/${chatId}`);
     onClose();
-  };
+  }, [dispatch, navigate, onClose]);
 
-  const handleEdit = (chatId: string, newTitle: string) => {
+  const handleEdit = useCallback((chatId: string, newTitle: string) => {
     dispatch({ type: "RENAME_CHAT", payload: { id: chatId, title: newTitle } });
-  };
+  }, [dispatch]);
 
-  const handleDelete = (chatId: string) => {
+  const handleDelete = useCallback((chatId: string) => {
     dispatch({ type: "DELETE_CHAT", payload: chatId });
     if (activeId === chatId) {
       navigate("/");
     }
-  };
+  }, [dispatch, activeId, navigate]);
 
   return (
     <div className={styles.sidebar}>

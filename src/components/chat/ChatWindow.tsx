@@ -6,6 +6,7 @@ import { sendMessageStream, sendMessageRest } from "../../api/gigachat";
 import type { MessageData, SettingsData } from "../../types";
 import MessageList from "./MessageList";
 import InputArea from "./InputArea";
+import ErrorBoundary from "../ErrorBoundary";
 import styles from "./ChatWindow.module.css";
 
 interface ChatWindowProps {
@@ -140,9 +141,21 @@ function ChatWindow({ token, settings, onOpenSettings }: ChatWindowProps) {
         </button>
       </div>
 
-      <MessageList messages={messages} isTyping={state.isLoading} />
+      <ErrorBoundary>
+        <MessageList messages={messages} isTyping={state.isLoading} />
+      </ErrorBoundary>
 
-      {state.error && <div className={styles.errorBar}>{state.error}</div>}
+      {state.error && (
+        <div className={styles.errorBar}>
+          <span>{state.error}</span>
+          <button
+            className={styles.retryButton}
+            onClick={() => dispatch({ type: "SET_ERROR", payload: null })}
+          >
+            Повторить
+          </button>
+        </div>
+      )}
 
       <InputArea
         onSend={handleSend}

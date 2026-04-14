@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import styles from "./ChatItem.module.css";
 
@@ -79,4 +79,4 @@ function ChatItem({ title, createdAt, isActive, onSelect, onEdit, onDelete }: Ch
   );
 }
 
-export default ChatItem;
+export default memo(ChatItem);

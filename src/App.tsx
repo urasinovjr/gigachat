@@ -1,12 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
 import AuthForm from "./components/auth/AuthForm";
 import AppLayout from "./components/layout/AppLayout";
-import Sidebar from "./components/sidebar/Sidebar";
-import SettingsPanel from "./components/settings/SettingsPanel";
 import AppRoutes from "./app/router/routes";
 import { getAccessToken } from "./api/gigachat";
 import { defaultSettings } from "./mocks/data";
 import type { SettingsData } from "./types";
+
+const Sidebar = lazy(() => import("./components/sidebar/Sidebar"));
+const SettingsPanel = lazy(() => import("./components/settings/SettingsPanel"));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -21,6 +22,19 @@ function App() {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
+  useEffect(() => {
+    const authKey = import.meta.env.VITE_GIGACHAT_AUTH_KEY;
+    const scope = import.meta.env.VITE_GIGACHAT_SCOPE || "GIGACHAT_API_PERS";
+    if (authKey) {
+      getAccessToken(authKey, scope)
+        .then((accessToken) => {
+          setToken(accessToken);
+          setIsAuthenticated(true);
+        })
+        .catch(() => {});
+    }
+  }, []);
+
   const handleLogin = async (credentials: string, scope: string) => {
     try {
       setAuthError("");
@@ -32,20 +46,32 @@ function App() {
     }
   };
 
-  const handleSaveSettings = (newSettings: SettingsData) => {
+  const handleSaveSettings = useCallback((newSettings: SettingsData) => {
     setSettings(newSettings);
     setTheme(newSettings.theme);
     setIsSettingsOpen(false);
-  };
+  }, []);
 
-  const handleResetSettings = () => {
+  const handleResetSettings = useCallback(() => {
     setSettings(defaultSettings);
     setTheme("light");
-  };
+  }, []);
 
-  const handleToggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const handleToggleSidebar = useCallback(() => {
+    setIsSidebarOpen((prev) => !prev);
+  }, []);
+
+  const handleCloseSidebar = useCallback(() => {
+    setIsSidebarOpen(false);
+  }, []);
+
+  const handleOpenSettings = useCallback(() => {
+    setIsSettingsOpen(true);
+  }, []);
+
+  const handleCloseSettings = useCallback(() => {
+    setIsSettingsOpen(false);
+  }, []);
 
   if (!isAuthenticated) {
     return <AuthForm onLogin={handleLogin} error={authError} />;
@@ -57,27 +83,31 @@ function App() {
         isSidebarOpen={isSidebarOpen}
         onToggleSidebar={handleToggleSidebar}
         sidebar={
-          <Sidebar
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
-          />
+          <Suspense fallback={<div />}>
+            <Sidebar
+              isOpen={isSidebarOpen}
+              onClose={handleCloseSidebar}
+            />
+          </Suspense>
         }
         main={
           <AppRoutes
             token={token}
             settings={settings}
-            onOpenSettings={() => setIsSettingsOpen(true)}
+            onOpenSettings={handleOpenSettings}
           />
         }
       />
 
-      <SettingsPanel
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        settings={settings}
-        onSave={handleSaveSettings}
-        onReset={handleResetSettings}
-      />
+      <Suspense fallback={<div />}>
+        <SettingsPanel
+          isOpen={isSettingsOpen}
+          onClose={handleCloseSettings}
+          settings={settings}
+          onSave={handleSaveSettings}
+          onReset={handleResetSettings}
+        />
+      </Suspense>
     </>
   );
 }

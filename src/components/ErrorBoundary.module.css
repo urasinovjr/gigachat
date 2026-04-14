@@ -1,0 +1,29 @@
+.errorFallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+  flex: 1;
+}
+
+.errorText {
+  font-size: 16px;
+  color: var(--color-error);
+}
+
+.retryButton {
+  padding: 8px 20px;
+  background-color: var(--color-primary);
+  color: var(--color-primary-text);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.retryButton:hover {
+  background-color: var(--color-primary-hover);
+}

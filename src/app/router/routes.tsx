@@ -1,7 +1,9 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route } from "react-router-dom";
-import ChatWindow from "../../components/chat/ChatWindow";
 import EmptyState from "../../components/chat/EmptyState";
 import type { SettingsData } from "../../types";
+
+const ChatWindow = lazy(() => import("../../components/chat/ChatWindow"));
 
 interface AppRoutesProps {
   token: string;
@@ -19,11 +21,13 @@ function AppRoutes({ token, settings, onOpenSettings }: AppRoutesProps) {
       <Route
         path="/chat/:id"
         element={
-          <ChatWindow
-            token={token}
-            settings={settings}
-            onOpenSettings={onOpenSettings}
-          />
+          <Suspense fallback={<div />}>
+            <ChatWindow
+              token={token}
+              settings={settings}
+              onOpenSettings={onOpenSettings}
+            />
+          </Suspense>
         }
       />
     </Routes>

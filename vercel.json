@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/auth",
+      "destination": "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
+    },
+    {
+      "source": "/api/gigachat/:path*",
+      "destination": "https://gigachat.devices.sberbank.ru/api/v1/:path*"
+    },
+    {
+      "source": "/:path*",
+      "destination": "/index.html"
+    }
+  ]
+}
