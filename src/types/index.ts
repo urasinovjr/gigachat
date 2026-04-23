@@ -18,6 +18,7 @@ export interface SettingsData {
   temperature: number;
   topP: number;
   maxTokens: number;
+  repetitionPenalty: number;
   systemPrompt: string;
   theme: "light" | "dark";
 }
@@ -25,7 +26,7 @@ export interface SettingsData {
 export interface ChatState {
   chats: Chat[];
   activeChatId: string | null;
-  messages: Record<string, MessageData[]>;
+  messages: { [chatId: string]: MessageData[] };
   isLoading: boolean;
   error: string | null;
 }

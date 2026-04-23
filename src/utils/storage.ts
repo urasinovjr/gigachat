@@ -5,13 +5,13 @@ const STORAGE_KEY = "gigachat-chats";
 interface SavedState {
   chats: Chat[];
   activeChatId: string | null;
-  messages: Record<string, MessageData[]>;
+  messages: { [chatId: string]: MessageData[] };
 }
 
 export function saveChats(
   chats: Chat[],
   activeChatId: string | null,
-  messages: Record<string, MessageData[]>
+  messages: { [chatId: string]: MessageData[] }
 ) {
   try {
     const data: SavedState = { chats, activeChatId, messages };

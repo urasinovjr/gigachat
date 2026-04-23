@@ -44,6 +44,7 @@ export async function sendMessageStream(
       temperature: settings.temperature,
       top_p: settings.topP,
       max_tokens: settings.maxTokens,
+      repetition_penalty: settings.repetitionPenalty,
       stream: true,
     }),
     signal,
@@ -71,9 +72,11 @@ export async function sendMessageStream(
       }
       try {
         const parsed = JSON.parse(data);
-        const content = parsed.choices?.[0]?.delta?.content;
-        if (content) {
-          onChunk(content);
+        if (parsed.choices && parsed.choices[0] && parsed.choices[0].delta) {
+          const content = parsed.choices[0].delta.content;
+          if (content) {
+            onChunk(content);
+          }
         }
       } catch {
         // skip
@@ -102,6 +105,7 @@ export async function sendMessageRest(
       temperature: settings.temperature,
       top_p: settings.topP,
       max_tokens: settings.maxTokens,
+      repetition_penalty: settings.repetitionPenalty,
       stream: false,
     }),
     signal,

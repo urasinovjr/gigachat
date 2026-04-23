@@ -74,6 +74,17 @@ function SettingsPanel({ isOpen, onClose, settings, onSave, onReset }: SettingsP
         </div>
 
         <div className={styles.field}>
+          <Slider
+            label="Repetition Penalty"
+            min={1}
+            max={2}
+            step={0.05}
+            value={local.repetitionPenalty}
+            onChange={(v) => setLocal({ ...local, repetitionPenalty: v })}
+          />
+        </div>
+
+        <div className={styles.field}>
           <label className={styles.label}>Max Tokens</label>
           <input
             type="number"

@@ -54,9 +54,9 @@ function ChatWindow({ token, settings, onOpenSettings }: ChatWindowProps) {
       dispatch({ type: "RENAME_CHAT", payload: { id, title: autoTitle } });
     }
 
-    const apiMessages = [];
+    const apiMessages: { role: "system" | "user" | "assistant"; content: string }[] = [];
     if (settings.systemPrompt) {
-      apiMessages.push({ role: "system" as const, content: settings.systemPrompt });
+      apiMessages.push({ role: "system", content: settings.systemPrompt });
     }
     for (const msg of currentMessages) {
       if (msg.role === "user" || msg.role === "assistant") {
@@ -115,7 +115,7 @@ function ChatWindow({ token, settings, onOpenSettings }: ChatWindowProps) {
       if (controller.signal.aborted) {
         // ignore
       } else {
-        const errorMessage = err instanceof Error ? err.message : "Произошла ошибка";
+        const errorMessage = (err as Error).message || "Произошла ошибка";
         dispatch({ type: "SET_ERROR", payload: errorMessage });
       }
     } finally {

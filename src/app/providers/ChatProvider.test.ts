@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { chatReducer } from "./ChatProvider";
+import { chatReducer } from "./chatReducer";
 import { initialState } from "./ChatContext";
 import type { ChatState } from "../../types";
 

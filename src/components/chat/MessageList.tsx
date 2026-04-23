@@ -14,7 +14,9 @@ function MessageList({ messages, isTyping }: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages, isTyping]);
 
   if (messages.length === 0 && !isTyping) {
