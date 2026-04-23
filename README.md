@@ -4,13 +4,21 @@
 
 ## Демо
 
+Развёрнутое приложение: https://gigachat-sigma.vercel.app
 
 Приложение позволяет:
 - Авторизоваться с помощью credentials GigaChat API
-- Вести несколько параллельных чатов с AI-ассистентом
-- Настраивать модель, температуру, top-p, max_tokens, repetition_penalty и system prompt
+- Вести несколько параллельных чатов с AI-ассистентом (SSE-стриминг токен за токеном, fallback на REST)
+- Markdown-форматирование ответов (заголовки, списки, ссылки, подсветка кода)
+- Копировать ответ ассистента в буфер, останавливать генерацию на лету
+- Настраивать модель, temperature, top-p, max_tokens, repetition_penalty и system prompt
 - Переключать светлую/тёмную тему
-- Искать по истории чатов
+- Искать по истории чатов (по названию и содержимому)
+- Сохранять все чаты и сообщения в localStorage
+
+## Скриншоты
+
+Скриншоты находятся в папке /screenshots
 
 ## Стек
 
@@ -27,26 +35,54 @@
 | Lucide React | 0.577 | Иконки |
 | Vitest | 4.1 | Тестирование |
 
+## Архитектура
+
+Модульная структура с разделением по фичам:
+
+```
+src/
+├── api/gigachat.ts           — адаптер API (OAuth, streaming, REST fallback)
+├── app/
+│   ├── providers/            — глобальное состояние (Context + useReducer)
+│   └── router/               — маршруты / и /chat/:id
+├── components/
+│   ├── auth/                 — форма авторизации
+│   ├── chat/                 — окно чата, сообщения, ввод, typing-indicator
+│   ├── layout/               — общий каркас (sidebar + main)
+│   ├── settings/             — панель настроек
+│   ├── sidebar/              — список чатов, поиск, элементы
+│   ├── ui/                   — переиспользуемые примитивы (Button, Slider, Toggle)
+│   └── ErrorBoundary.tsx     — изоляция ошибок в сообщениях
+├── types/                    — TypeScript-типы
+├── utils/storage.ts          — работа с localStorage
+└── styles/theme.css          — CSS-переменные и глобальные стили
+```
+
 ## Запуск локально
 
 ```bash
 # 1. Клонируйте репозиторий
-git clone https://github.com/<your-username>/gigachat.git
+git clone https://github.com/urasinovjr/gigachat.git
 cd gigachat
 
 # 2. Установите зависимости
 npm install
 
-# 3. Создайте файл .env на основе шаблона
-cp .env.example .env
-
-# 4. Заполните переменные окружения (см. таблицу ниже)
-
-# 5. Запустите dev-сервер
+# 3. Запустите dev-сервер
 npm run dev
 ```
 
-Приложение откроется по адресу `http://localhost:5173`
+Приложение откроется по адресу `http://localhost:5173`. Форма авторизации попросит ввести ваши credentials GigaChat API (Base64) и выбрать scope.
+
+### Опционально: авто-логин через переменные окружения
+
+Если хотите, чтобы credentials подставлялись автоматически:
+
+```bash
+cp .env.example .env
+# затем заполните VITE_GIGACHAT_AUTH_KEY и VITE_GIGACHAT_SCOPE в .env
+npm run dev
+```
 
 ## Переменные окружения
 
@@ -69,17 +105,32 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npm run analyze` | Анализ размера бандла |
 
+## Тесты
+
+25 тестов на Vitest 4.1 + React Testing Library + jsdom:
+
+- **Reducer** (6): действия CREATE_CHAT / DELETE_CHAT / RENAME_CHAT / ADD_MESSAGE
+- **LocalStorage** (6): saveChats / loadChats, валидация схемы, обработка битого JSON
+- **Компоненты** (13): InputArea (5) — отправка/Enter/Shift+Enter/Stop, Message (5) — user/assistant/system/копирование, Sidebar (3) — фильтрация/удаление
+
+Запуск:
+```bash
+npm run test        # watch-режим
+npm run test:run    # однократный прогон
+```
+
 ## Оптимизации
 
 - **Code Splitting**: React.lazy + Suspense для Sidebar, SettingsPanel и ChatWindow (отдельные чанки)
 - **Bundle Splitting**: react-markdown и highlight.js вынесены в отдельный чанк `markdown` через Vite manualChunks
 - **Мемоизация**: React.memo (ChatItem), useMemo (фильтрация чатов), useCallback (обработчики)
-- **Error Boundaries**: Изоляция ошибок в области сообщений, кнопка "Повторить"
+- **Error Boundaries**: изоляция ошибок в области сообщений, кнопка "Повторить"
 
-Скриншот анализа бандла находится в `docs/bundle-stats.html` (откройте в браузере).
+Интерактивный отчёт анализа бандла находится в `docs/bundle-stats.html` (откройте в браузере).
 
 ## Деплой
 
-Приложение настроено для деплоя на Vercel:
-- `vercel.json` содержит rewrites для проксирования API-запросов и SPA-маршрутизации
-- Переменные окружения задаются в настройках проекта на Vercel
+Приложение развёрнуто на Vercel: https://gigachat-sigma.vercel.app
+
+- `vercel.json` содержит rewrites для проксирования API-запросов (`/api/auth` → OAuth SberBank, `/api/gigachat/*` → GigaChat API) и SPA-fallback
+- В текущем деплое `VITE_GIGACHAT_AUTH_KEY` **не задан** — каждый пользователь вводит свои credentials в форме авторизации, чтобы не расходовать чужую квоту
